@@ -1,14 +1,22 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { LoginServiceService } from 'src/app/services/login-service.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent  {
+  //implements OnInit
+
   
 
-  opened=true;
+  sidebarOpened = false;
+
+  toggleSidebar() {
+    this.sidebarOpened = !this.sidebarOpened;
+  }
 
   // data:any=[
   //   {
@@ -34,11 +42,38 @@ export class DashboardComponent implements OnInit {
   //   }
   //  ];
 
-  ngOnInit() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // Redirect to login or perform desired action
-    }
-   }
+  // ngOnInit() {
+  //   const token = localStorage.getItem('token');
+  //   if (!token) {
+  //     // Redirect to login or perform desired action
+  //   }
+  //  }
+
+   //-------------------------second--------
+
+   constructor(private service:LoginServiceService, private route:ActivatedRoute){}
+   token:string|null=null;
+ 
+   userEmail !:string;
+
+  userDetails:any;
+ 
+  //  ngOnInit(){
+  //    this.getUser();
+  //    this.userEmail = this.route.snapshot.params['userEmail'];
+
+  //  }
+  //  getUser(){
+  //    this.service.getUserDetails().subscribe(
+  //      (response)=>{
+  //        this.userDetails=response;
+  //      },
+  //      (error)=>{
+  //        console.log(error);
+  //      }
+  //    )
+  //  }
+ 
+  
 
 }

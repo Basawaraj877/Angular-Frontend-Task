@@ -10,21 +10,32 @@ import { FolderCardsComponent } from './components/folder-cards/folder-cards.com
 import { LoginForm2Component } from './components/login-form2/login-form2.component';
 import { SlideBarComponent } from './components/slide-bar/slide-bar.component';
 import { WelcomeHomeComponent } from './components/welcome-home/welcome-home.component';
+import { OrganizationComponent } from './components/organization/organization.component';
+import { LayoutComponent } from './layout/layout/layout.component';
+
 // import { AuthGuard } from './services/auth.guard';
 
 const routes: Routes = [
 
-  {path:'',component:HomeComponent,pathMatch:'full'},
+  {path:'home',component:HomeComponent,pathMatch:'full'},
+  {path: '',component:LoginComponent,pathMatch:'full'},
   {path: 'login',component:LoginComponent,pathMatch:'full'},
   {path: 'forgot-password',component:ForgotPasswordComponent,pathMatch:'full'},
-
-  {path:'dashboard',component:DashboardComponent,pathMatch:'full'},
-  {path: 'aboutus',component:AboutusComponentComponent,pathMatch:'full'},
-  {path: 'contact',component:ContactComponent,pathMatch:'full'},
-  {path: 'folder-cards',component:FolderCardsComponent,pathMatch:'full'},
-  {path: 'login-form2',component:LoginForm2Component,pathMatch:'full'},
-  {path:  'slide-bar',component:SlideBarComponent,pathMatch:'full'},
-  {path: 'welcome-home',component:WelcomeHomeComponent,pathMatch:'full'}
+  {
+  path:"layout",
+  component: LayoutComponent,
+  children:[
+    {path:'dashboard',component:DashboardComponent},
+    {path: 'aboutus',component:AboutusComponentComponent,pathMatch:'full'},
+    {path: 'contact',component:ContactComponent,pathMatch:'full'},
+    {path: 'folder-cards',component:FolderCardsComponent,pathMatch:'full'},
+    {path: 'login-form2',component:LoginForm2Component,pathMatch:'full'},
+    {path:  'slide-bar',component:SlideBarComponent,pathMatch:'full'},
+    {path: 'welcome-home',component:WelcomeHomeComponent,pathMatch:'full'},
+    {path:'org-org',component:OrganizationComponent,pathMatch:'full'}
+  ]
+  }
+  
  ];
 
 @NgModule({

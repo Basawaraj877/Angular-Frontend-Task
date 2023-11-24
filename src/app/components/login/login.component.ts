@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Credentails } from 'src/app/credentails';
 import { LoginServiceService } from 'src/app/services/login-service.service';
+import { OrgServiceService } from 'src/app/services/services/org-service.service';
+import { User } from 'src/app/user';
+
 
 @Component({
   selector: 'app-login',
@@ -9,87 +13,88 @@ import { LoginServiceService } from 'src/app/services/login-service.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-email: string='';
-password: string='';
-errorMessage: String='';
+ 
+ 
+email:string='';
+password:string=''; 
+
+token!:string;    
+statusCode:number|null=null;
+errorCode:number|null=null; /*  Represents the error code from the login response. */
+message:string|null=null;
+
+loginError:string|null=null; /* Stores the specific login error message if encountered. */
+
+
+ //FormBuilder service used to building the login form  
+ //Router-> for the navigation 
+constructor(private service:LoginServiceService,private orgService:OrgServiceService,private router:Router,
+            private fb:FormBuilder){}
+
+           
+            public loginForm = this.fb.group({
+                email: this.fb.control('', [Validators.required,Validators.pattern(/^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/)]),
+                password: this.fb.control('',[Validators.required,Validators.pattern(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/)])
+              }); 
+               
+               get Email():FormControl{
+                return this.loginForm.get("email")as FormControl;
+               }
+              
+               get Password(): FormControl{
+               
+                 return this.loginForm.get("password") as FormControl;
+               }
+
 
  
+ /* Receives form data
+  Invoke the login service using the provided data
+  Handle the login response and errors
+  Store the authenticaion token in local storage */              
 
-constructor(private loginService:LoginServiceService){
+onSubmit(data:any):void{
+  console.log(data);
+  this.service.login(data).subscribe(
+    (response)=>{
+      console.log(response);
+      this.token=response.data.token
+      this.errorCode=response.errorCode
+      this.message=response.message
+      this.statusCode=response.statusCode
+
+      localStorage.setItem('token',this.token);
+
+      this.doNavigating();
+    },
+    (error)=>{
+      console.log("This is error block");
+      console.log(error);
+    }
+  )
 
 }
 
-//login form 
-loginForm =  new FormGroup({
-  email : new FormControl('',[Validators.required,this.customEmailValidator()]),
-  password : new FormControl('',[Validators.required,this.customPasswordValidator()])
-});
-
-customEmailValidator() {
-  return (control:any) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (control.value && !emailRegex.test(control.value)) {
-      return { invalidEmail: true };
-    }
-
-    return null;
-  };
+/*Based on the recived response, navigate the user to
+ the appropriate page or display relevant error */
+doNavigating():void{
+if(this.statusCode==0&&this.token!=null){
+  localStorage.setItem('token',this.token)
+  console.log(localStorage.getItem('token')); 
+  this.orgService.updateTokenInOrg(this.token);
+  this.router.navigate(["/layout"]);
 }
-
-customPasswordValidator() {
-  return (control : any) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/;
-
-    if (control.value && !passwordRegex.test(control.value)) {
-      return { invalidPassword: true };
-    }
-
-    return null;
-  };
-}
-
-
-
-credentails: Credentails = new Credentails();
-
-
-
-onSubmit(){
-  //console.log('forms is submitted..');
-
-  if((this.credentails.email !='' && this.credentails.password !='' )&&(this.credentails.email !=null && this.credentails.password !=null )){
-    console.log("we to submit the form to server...");
-    //token generate
-   this.loginService.generateToken(this.credentails).subscribe(
-    (response:any)=>{
-      //success
-         console.log(response.token);
-        this.loginService.loginUser(response.token)
-        window.location.href="/dashboard"
-        this.errorMessage ='';
-
-    }
-    ,
-    error=>{
-      //error
-     console.error('Error',error);
-    this.errorMessage= "Invalid credentials. Please try again";
-    }
-   );
-
-
+else{
+  switch(this.errorCode){
+    case 8:this.loginError="Authentication Error";break;
+    case 9:this.loginError="Bad credentials";break;
+    case 10:this.loginError="Password expired";break;
+    case 11:this.loginError="Account Expired";break;
+    case 12:this.loginError="Account De-activated";break;
+    case 13:this.loginError="Account Locked";break;
   }
-  else{
-  this.errorMessage = "Please try again";    
-  }
-
-// .......................
-
- 
-  
 }
- 
- 
+
+}
 
 }

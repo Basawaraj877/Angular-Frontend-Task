@@ -1,50 +1,56 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Credentails } from '../credentails';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { User } from '../user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginServiceService {
+ 
 
-  url ="http://localhost:8383/auth/login";
+  //private httpOptions={headers:HttpHeaders};
+  token: string | null = null  /* holds the authentication token intially set to null  */
+  // httpOptions = { headers: new HttpHeaders() };
 
-  constructor(private _http:HttpClient) { }
+  //making http requests
+  constructor(private http: HttpClient) {
 
-//calling the server to genarate token
-//doLogin(email:string, password:string){
+  }
+  private dataSubject = new BehaviorSubject<any>(null);
 
-generateToken(credentails:any){
-  //token genarate
-  return this._http.post(`${this.url}`,credentails);
-}
+  data$ = this.dataSubject.asObservable(); // Observable for the data subject that emits updated data to subscribers.
 
-  // for login user
-loginUser(token: string){
+  //updates the token property and emits the updated data using the dataSubject
+  updateData(data: any) {
+    this.token = data;
+    console.log("Token --> " + this.token);
+    this.dataSubject.next(data);
+  } 
 
-  localStorage.setItem("token",token)
-  return true;
-}
 
-// to check that is logged in or not
-isLoggedIn(){
-let token = localStorage.getItem("token");
-if(token==undefined || token==='' || token==null){
-  return false;
-}
-else{
-  return true;
-}
-}
-// for logout the user 
-logout(){
-  localStorage.removeItem("token");
-  return true;
-}
+  httpapi = 'http://localhost:8383/auth/login'
+  httpgetapi = 'http://localhost:8383/auth/get-user'
 
-//for getting the token
-getToken(){
-  return localStorage.getItem("token");
-}
 
+  // performs post request to the authentication api with user data
+  public login(data: User): Observable<any> {
+    return this.http.post<any>(this.httpapi, data);
+  }
+
+  //fetches user details user details using get request with stored authentication token from the   local storage
+  public getUserDetails(): Observable<User> {
+    console.log("getUserDetails in login service called");
+
+    const tokenFound = localStorage.getItem('token');
+    const httpoptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + tokenFound
+      })
+    }
+    return this.http.get<User>(this.httpgetapi, httpoptions);
+  }
+
+   
 }

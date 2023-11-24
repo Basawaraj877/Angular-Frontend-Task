@@ -4,8 +4,17 @@
 .error{
     color: red;
 } 
-.error-message{
+ .red-color-email{
     color: red;
-   
-    height: -4px;
-}
+    
+ }
+ .red-color-password{
+    color: red;
+ }
+ .text-height{
+    font-size: 15px;
+    margin-top: -20px;
+     
+    line-height: 32px;
+    font-weight: 400;
+ }

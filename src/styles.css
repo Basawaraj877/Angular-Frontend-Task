@@ -19,3 +19,5 @@ mat-drawer{
     background-color: #141414;
     width: 200px;
 }
+
+@import 'ngx-toastr/toastr';
